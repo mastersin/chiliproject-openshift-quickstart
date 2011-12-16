@@ -28,3 +28,13 @@ then
 else
     echo "Database found, skipping import."
 fi
+
+pushd ${OPENSHIFT_REPO_DIR} > /dev/null
+bundle exec rake generate_session_store
+
+#bundle exec rake db:migrate RAILS_ENV="production"
+#bundle exec rake db:migrate:plugins RAILS_ENV=production
+
+#bundle exec rake tmp:cache:clear
+#bundle exec rake tmp:sessions:clear
+popd > /dev/null
