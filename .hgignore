@@ -2,10 +2,6 @@ syntax: glob
 
 .project
 .loadpath
-config/additional_environment.rb
-config/configuration.yml
-config/database.yml
-config/email.yml
 config/initializers/session_store.rb
 coverage
 db/*.db
@@ -29,5 +25,4 @@ vendor/rails
 .git/
 doc/app
 /.bundle
-/Gemfile.lock
 /.rvmrc*
