@@ -26,24 +26,6 @@ group :openid do
   gem "ruby-openid", '~> 2.1.4', :require => 'openid'
 end
 
-group :rmagick do
-  gem "rmagick", ">= 1.15.17"
-  # Older distributions might not have a sufficiently new ImageMagick version
-  # for the current rmagick release (current rmagick is rmagick 2, which
-  # requires ImageMagick 6.4.9 or later). If this is the case for you, comment
-  # the line above this comment block and uncomment the one underneath it to
-  # get an rmagick version known to work on older distributions.
-  #
-  # The following distributíons are known to *not* ship with a usable
-  # ImageMagick version. There might be additional ones.
-  #   * Ubuntu 9.10 and older
-  #   * Debian Lenny 5.0 and older
-  #   * CentOS 5 and older
-  #   * RedHat 5 and older
-  #
-  #gem "rmagick", "< 2.0.0"
-end
-
 # Use the commented pure ruby gems, if you have not the needed prerequisites on
 # board to compile the native ones.  Note, that their use is discouraged, since
 # their integration is propbably not that well tested and their are slower in
@@ -53,11 +35,6 @@ end
 platforms :mri, :mingw do
   group :mysql2 do
     gem "mysql2", "~> 0.2.7"
-  end
-
-  group :postgres do
-    gem "pg", "~> 0.9.0"
-    #   gem "postgres-pr"
   end
 end
 
@@ -75,22 +52,6 @@ end
 platforms :mri_19, :mingw_19 do
   group :sqlite do
     gem "sqlite3"
-  end
-end
-
-platforms :jruby do
-  gem "jruby-openssl"
-
-  group :mysql do
-    gem "activerecord-jdbcmysql-adapter"
-  end
-
-  group :postgres do
-    gem "activerecord-jdbcpostgresql-adapter"
-  end
-
-  group :sqlite do
-    gem "activerecord-jdbcsqlite3-adapter"
   end
 end
 

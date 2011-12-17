@@ -28,7 +28,6 @@ GEM
     mysql (2.8.1)
     mysql2 (0.2.18)
     net-ldap (0.2.2)
-    pg (0.9.0)
     rack (1.1.2)
     rails (2.3.14)
       actionmailer (= 2.3.14)
@@ -41,7 +40,6 @@ GEM
     rbx-require-relative (0.0.5)
     rdoc (3.12)
       json (~> 1.4)
-    rmagick (2.13.1)
     ruby-debug (0.10.4)
       columnize (>= 0.1)
       ruby-debug-base (~> 0.10.4.0)
@@ -67,22 +65,16 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord-jdbcmysql-adapter
-  activerecord-jdbcpostgresql-adapter
-  activerecord-jdbcsqlite3-adapter
   coderay (~> 0.9.7)
   edavis10-object_daddy
   fastercsv (~> 1.5.0)
   i18n (~> 0.4.2)
-  jruby-openssl
   mocha
   mysql
   mysql2 (~> 0.2.7)
   net-ldap (~> 0.2.2)
-  pg (~> 0.9.0)
   rails (= 2.3.14)
   rdoc (>= 2.4.2)
-  rmagick (>= 1.15.17)
   ruby-debug
   ruby-debug19
   ruby-openid (~> 2.1.4)
