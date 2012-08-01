@@ -64,10 +64,9 @@ class User < Principal
   validates_uniqueness_of :mail, :if => Proc.new { |user| !user.mail.blank? }, :case_sensitive => false
   # Login must contain lettres, numbers, underscores only
   validates_format_of :login, :with => /^[a-z0-9_\-@\.]*$/i
-  validates_length_of :login, :maximum => 30
-  validates_length_of :firstname, :lastname, :maximum => 30
+  validates_length_of :login, :firstname, :lastname, :maximum => 255
   validates_format_of :mail, :with => /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i, :allow_nil => true
-  validates_length_of :mail, :maximum => 60, :allow_nil => true
+  validates_length_of :mail, :maximum => 255, :allow_nil => true
   validates_confirmation_of :password, :allow_nil => true
   validates_inclusion_of :mail_notification, :in => MAIL_NOTIFICATION_OPTIONS.collect(&:first), :allow_blank => true
   validates_inclusion_of :status, :in => [STATUS_ANONYMOUS, STATUS_ACTIVE, STATUS_REGISTERED, STATUS_LOCKED]
@@ -345,27 +344,6 @@ class User < Principal
     !logged?
   end
 
-  # Return user's roles for project
-  def roles_for_project(project)
-    roles = []
-    # No role on archived projects
-    return roles unless project && project.active?
-    if logged?
-      # Find project membership
-      membership = memberships.detect {|m| m.project_id == project.id}
-      if membership
-        roles = membership.roles
-      else
-        @role_non_member ||= Role.non_member
-        roles << @role_non_member
-      end
-    else
-      @role_anonymous ||= Role.anonymous
-      roles << @role_anonymous
-    end
-    roles
-  end
-
   # Return true if the user is a member of project
   def member_of?(project)
     !roles_for_project(project).detect {|role| role.member?}.nil?
@@ -386,53 +364,6 @@ class User < Principal
     end
 
     @projects_by_role
-  end
-
-  # Return true if the user is allowed to do the specified action on a specific context
-  # Action can be:
-  # * a parameter-like Hash (eg. :controller => 'projects', :action => 'edit')
-  # * a permission Symbol (eg. :edit_project)
-  # Context can be:
-  # * a project : returns true if user is allowed to do the specified action on this project
-  # * a group of projects : returns true if user is allowed on every project
-  # * nil with options[:global] set : check if user has at least one role allowed for this action,
-  #   or falls back to Non Member / Anonymous permissions depending if the user is logged
-  def allowed_to?(action, context, options={})
-    if context && context.is_a?(Project)
-      # No action allowed on archived projects
-      return false unless context.active?
-      # No action allowed on disabled modules
-      return false unless context.allows_to?(action)
-      # Admin users are authorized for anything else
-      return true if admin?
-
-      roles = roles_for_project(context)
-      return false unless roles
-      roles.detect {|role| (context.is_public? || role.member?) && role.allowed_to?(action)}
-
-    elsif context && context.is_a?(Array)
-      # Authorize if user is authorized on every element of the array
-      context.map do |project|
-        allowed_to?(action,project,options)
-      end.inject do |memo,allowed|
-        memo && allowed
-      end
-    elsif options[:global]
-      # Admin users are always authorized
-      return true if admin?
-
-      # authorize if user has at least one role that has this permission
-      roles = memberships.collect {|m| m.roles}.flatten.uniq
-      roles.detect {|r| r.allowed_to?(action)} || (self.logged? ? Role.non_member.allowed_to?(action) : Role.anonymous.allowed_to?(action))
-    else
-      false
-    end
-  end
-
-  # Is the user allowed to do the specified action on any project?
-  # See allowed_to? for the actions and valid options.
-  def allowed_to_globally?(action, options)
-    allowed_to?(action, nil, options.reverse_merge(:global => true))
   end
 
   safe_attributes 'login',

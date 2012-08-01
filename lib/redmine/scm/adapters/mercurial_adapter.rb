@@ -12,7 +12,7 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-require 'redmine/scm/adapters/abstract_adapter'
+require_dependency 'redmine/scm/adapters/abstract_adapter'
 require 'cgi'
 
 module Redmine
@@ -271,7 +271,8 @@ module Redmine
           end
           blame
         rescue HgCommandAborted
-          nil  # means not found or cannot be annotated
+          # means not found or cannot be annotated
+          Annotate.new
         end
 
         class Revision < Redmine::Scm::Adapters::Revision

@@ -21,6 +21,7 @@ class IssueTest < ActiveSupport::TestCase
            :issue_statuses, :issue_categories, :issue_relations, :workflows,
            :enumerations,
            :issues,
+           :journals,
            :custom_fields, :custom_fields_projects, :custom_fields_trackers, :custom_values,
            :time_entries
 
@@ -599,7 +600,7 @@ class IssueTest < ActiveSupport::TestCase
     issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'test_create', :estimated_hours => '1:30')
 
     assert issue.save
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
   def test_stale_issue_should_not_send_email_notification
@@ -610,7 +611,7 @@ class IssueTest < ActiveSupport::TestCase
     issue.init_journal(User.find(1))
     issue.subject = 'Subjet update'
     assert issue.save
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 2, ActionMailer::Base.deliveries.size
     ActionMailer::Base.deliveries.clear
 
     stale.init_journal(User.find(1))

@@ -103,6 +103,10 @@ class Issue < ActiveRecord::Base
     (usr || User.current).allowed_to?(:view_issues, self.project)
   end
 
+  def to_liquid
+    IssueDrop.new(self)
+  end
+
   def after_initialize
     if new_record?
       # set default values for new records only
@@ -701,6 +705,15 @@ class Issue < ActiveRecord::Base
       end
     end
     projects
+  end
+
+  # Overrides Redmine::Acts::Journalized::Permissions
+  #
+  # The default assumption is that journals have the same permissions
+  # as the journaled object, issue notes have separate permissions though
+  def journal_editable_by?(journal, user)
+    return true if journal.user == user && user.allowed_to?(:edit_own_issue_notes, project)
+    user.allowed_to? :edit_issue_notes, project
   end
 
   private

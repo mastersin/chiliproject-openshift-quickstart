@@ -88,14 +88,19 @@ class MessagesControllerTest < ActionController::TestCase
     assert_equal 2, message.author_id
     assert_equal 1, message.board_id
 
-    mail = ActionMailer::Base.deliveries.last
+    # author
+    mails_to_author = ActionMailer::Base.deliveries.select {|m| m.to.include?('jsmith@somenet.foo') }
+    assert_equal 1, mails_to_author.length
+    mail = mails_to_author.first
+    assert mail.to.include?('jsmith@somenet.foo')
     assert_kind_of TMail::Mail, mail
     assert_equal "[#{message.board.project.name} - #{message.board.name} - msg#{message.root.id}] Test created message", mail.subject
     assert mail.body.include?('Message body')
-    # author
-    assert mail.bcc.include?('jsmith@somenet.foo')
+
     # project member
-    assert mail.bcc.include?('dlopper@somenet.foo')
+    mails_to_member = ActionMailer::Base.deliveries.select {|m| m.to.include?('dlopper@somenet.foo') }
+    assert_equal 1, mails_to_member.length
+    assert mails_to_member.first.to.include?('dlopper@somenet.foo')
   end
 
   def test_get_edit
@@ -114,6 +119,30 @@ class MessagesControllerTest < ActionController::TestCase
     message = Message.find(1)
     assert_equal 'New subject', message.subject
     assert_equal 'New body', message.content
+  end
+
+  def test_post_edit_sticky_and_locked
+   @request.session[:user_id] = 2
+   post :edit, :board_id => 1, :id => 1,
+               :message => { :subject => 'New subject',
+                             :content => 'New body',
+                             :locked => '1',
+                             :sticky => '1'}
+   assert_redirected_to '/boards/1/topics/1'
+   message = Message.find(1)
+   assert_equal true, message.sticky?
+   assert_equal true, message.locked?
+  end
+
+  def test_post_edit_should_allow_to_change_board
+   @request.session[:user_id] = 2
+   post :edit, :board_id => 1, :id => 1,
+               :message => { :subject => 'New subject',
+                             :content => 'New body',
+                             :board_id => 2}
+   assert_redirected_to '/boards/2/topics/1'
+   message = Message.find(1)
+   assert_equal Board.find(2), message.board
   end
 
   def test_reply

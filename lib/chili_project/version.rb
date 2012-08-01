@@ -17,8 +17,8 @@ require 'rexml/document'
 module ChiliProject
   module VERSION #:nodoc:
 
-    MAJOR = 2
-    MINOR = 7
+    MAJOR = 3
+    MINOR = 3
     PATCH = 3
     TINY  = PATCH # Redmine compat
 
@@ -43,7 +43,7 @@ module ChiliProject
         git_dir = Rails.root.join('.git')
 
         if File.directory? git_dir
-          git.send(:shellout, "#{git.sq_bin} --git-dir='#{git_dir}' rev-parse --short=9 HEAD") { |io| io.read }.to_s.chomp
+          git.send(:shellout, "#{git.sq_bin} --git-dir=#{git.shell_quote git_dir.to_s} rev-parse --short=9 HEAD") { |io| io.read }.to_s.chomp
         end
       end
     end

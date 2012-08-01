@@ -1,5 +1,6 @@
 /.project
 /.loadpath
+/config/setup_load_paths.rb
 /config/initializers/session_store.rb
 /coverage
 /db/*.db
@@ -22,3 +23,6 @@
 doc/app
 /.bundle
 /.rvmrc*
+/*.iml
+/.idea
+.rbx

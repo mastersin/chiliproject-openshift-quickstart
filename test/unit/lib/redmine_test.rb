@@ -42,9 +42,7 @@ class RedmineTest < ActiveSupport::TestCase
   end
 
   def test_account_menu
-    assert_number_of_items_in_menu :account_menu, 4
-    assert_menu_contains_item_named :account_menu, :login
-    assert_menu_contains_item_named :account_menu, :register
+    assert_number_of_items_in_menu :account_menu, 2
     assert_menu_contains_item_named :account_menu, :my_account
     assert_menu_contains_item_named :account_menu, :logout
   end
@@ -75,8 +73,8 @@ class RedmineTest < ActiveSupport::TestCase
     assert_menu_contains_item_named :project_menu, :settings
   end
 
-  def test_new_issue_should_have_root_as_a_parent
+  def test_new_issue_should_have_issues_as_a_parent
     new_issue = get_menu_item(:project_menu, :new_issue)
-    assert_equal :root, new_issue.parent.name
+    assert_equal :issues, new_issue.parent.name
   end
 end

@@ -52,13 +52,14 @@ module IssuesHelper
       "<strong>#{@cached_label_priority}</strong>: #{h(issue.priority.name)}"
   end
 
+  # TODO: deprecate and/or remove
   def render_issue_subject_with_tree(issue)
     s = ''
     ancestors = issue.root? ? [] : issue.ancestors.all
     ancestors.each do |ancestor|
-      s << '<div>' + content_tag('p', link_to_issue(ancestor))
+      s << '<div>' + content_tag('h2', link_to_issue(ancestor))
     end
-    s << '<div>' + content_tag('h3', h(issue.subject))
+    s << '<div class="subject">' + content_tag('h2', h(issue.subject))
     s << '</div>' * (ancestors.size + 1)
     s
   end
@@ -75,6 +76,22 @@ module IssuesHelper
              :class => "issue issue-#{child.id} hascontextmenu #{level > 0 ? "idnt idnt-#{level}" : nil}")
     end
     s << '</form></table>'
+    s
+  end
+
+  def render_parents_and_subtree(issue)
+    return if issue.leaf? && !issue.parent
+    s = '<form><table id="issue_tree" class="list">'
+    issue_list(issue.self_and_ancestors.sort_by(&:lft) + issue.descendants.sort_by(&:lft)) do |el, level|
+      s << content_tag('tr',
+             content_tag('td', check_box_tag("ids[]", el.id, false, :id => nil), :class => 'checkbox') +
+             content_tag('td', link_to_issue(el, :truncate => 60), :class => 'subject') +
+             content_tag('td', h(el.status)) +
+             content_tag('td', link_to_user(el.assigned_to)) +
+             content_tag('td', progress_bar(el.done_ratio, :width => '80px')),
+             :class => "issue issue-#{el.id} #{"self" if el == issue} hascontextmenu #{level > 0 ? "idnt idnt-#{level}" : nil}")
+    end
+    s << '</table></form>'
     s
   end
 

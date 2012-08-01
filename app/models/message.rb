@@ -41,7 +41,6 @@ class Message < ActiveRecord::Base
 
   acts_as_watchable
 
-  attr_protected :locked, :sticky
   validates_presence_of :board, :subject, :content
   validates_length_of :subject, :maximum => 255
 
@@ -52,6 +51,12 @@ class Message < ActiveRecord::Base
 
   safe_attributes 'subject', 'content'
   safe_attributes 'locked', 'sticky',
+    :if => lambda {|message, user|
+      user.allowed_to?(:edit_messages, message.project)
+    }
+
+  safe_attributes 'subject', 'content'
+  safe_attributes 'locked', 'sticky', 'board_id',
     :if => lambda {|message, user|
       user.allowed_to?(:edit_messages, message.project)
     }
@@ -81,7 +86,13 @@ class Message < ActiveRecord::Base
   end
 
   def after_destroy
+    parent.reset_last_reply_id! if parent
     board.reset_counters!
+  end
+
+  def reset_last_reply_id!
+    clid = children.present? ? children.last.id : nil
+    self.update_attribute(:last_reply_id, clid)
   end
 
   def sticky=(arg)

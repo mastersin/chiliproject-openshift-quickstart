@@ -231,6 +231,13 @@ begin
         end
       end
 
+      def test_default_branch
+        @adapter.send :scm_cmd, 'branch', '-m', 'master', 'non-master-default-branch'
+        assert_equal 'non-master-default-branch', @adapter.default_branch
+      ensure
+        @adapter.send :scm_cmd, 'branch', '-m', 'non-master-default-branch', 'master'
+      end
+
       private
 
       def test_scm_version_for(scm_command_version, version)
@@ -239,7 +246,7 @@ begin
       end
 
     else
-      puts "Git test repository NOT FOUND. Skipping unit tests !!!"
+      should "Git test repository not found."
       def test_fake; assert true end
     end
   end

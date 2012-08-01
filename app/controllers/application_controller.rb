@@ -31,18 +31,6 @@ class ApplicationController < ActionController::Base
     cookies.delete(:autologin)
   end
 
-  # Remove broken cookie after upgrade from 0.8.x (#4292)
-  # See https://rails.lighthouseapp.com/projects/8994/tickets/3360
-  # TODO: remove it when Rails is fixed
-  before_filter :delete_broken_cookies
-  def delete_broken_cookies
-    if cookies['_chiliproject_session'] && cookies['_chiliproject_session'] !~ /--/
-      cookies.delete '_chiliproject_session'
-      redirect_to home_path
-      return false
-    end
-  end
-
   # FIXME: Remove this when all of Rack and Rails have learned how to
   # properly use encodings
   before_filter :params_filter
@@ -64,7 +52,9 @@ class ApplicationController < ActionController::Base
   before_filter :user_setup, :check_if_login_required, :set_localization
   filter_parameter_logging :password
 
-  rescue_from ActionController::InvalidAuthenticityToken, :with => :invalid_authenticity_token
+  # FIXME: This doesn't work with Rails >= 3.0 anymore
+  # Possible workaround: https://github.com/rails/rails/issues/671#issuecomment-1780159
+  rescue_from ActionController::RoutingError, :with => proc{render_404}
 
   include Redmine::Search::Controller
   include Redmine::MenuManager::MenuController
@@ -75,8 +65,6 @@ class ApplicationController < ActionController::Base
   end
 
   def user_setup
-    # Check the settings cache for each request
-    Setting.check_cache
     # Find the current user
     User.current = find_current_user
   end
@@ -333,13 +321,6 @@ class ApplicationController < ActionController::Base
   # @return [boolean, string] name of the layout to use or false for no layout
   def use_layout
     request.xhr? ? false : 'base'
-  end
-
-  def invalid_authenticity_token
-    if api_request?
-      logger.error "Form authenticity token is missing or is invalid. API calls must include a proper Content-type header (text/xml or text/json)."
-    end
-    render_error "Invalid form authenticity token."
   end
 
   def render_feed(items, options={})

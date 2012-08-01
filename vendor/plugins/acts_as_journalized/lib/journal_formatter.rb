@@ -28,6 +28,7 @@ module JournalFormatter
   include CustomFieldsHelper
   include ActionView::Helpers::TagHelper
   include ActionView::Helpers::UrlHelper
+  include ActionView::Helpers::TextHelper
   include ActionController::UrlWriter
   extend Redmine::I18n
 
@@ -113,15 +114,29 @@ module JournalFormatter
     end
   end
 
-  def format_html_detail(label, old_value, value)
+  def format_html_detail(label, key, old_value, value, options = {})
     label = content_tag('strong', label)
-    old_value = content_tag("i", h(old_value)) if old_value && !old_value.blank?
-    old_value = content_tag("strike", old_value) if old_value and value.blank?
-    value = content_tag("i", h(value)) if value.present?
+
+    # Sanitize values
+    old_value, value = h(old_value), h(value)
+
+    # Truncate as needed
+    old_value, value = truncate(old_value, :length => 80), truncate(value, :length => 80) if options[:truncate].present?
+
+    # Style
+    old_value = content_tag("i", old_value) if old_value.present?
+    old_value = content_tag("strike", old_value) if old_value.present? and value.blank?
+    value = content_tag("i", value) if value.present?
     value ||= ""
+
+    # More link
+    if options[:more_link].present?
+      value += " " + link_to(l(:label_more), {:controller => 'journals', :action => 'diff', :id => id, :field => key.to_s}, :class => 'lightbox-ajax')
+    end
+
     [label, old_value, value]
   end
-
+  
   def property(detail)
     key = prop_key(detail)
     if key.start_with? "custom_values"
@@ -184,7 +199,9 @@ module JournalFormatter
     label, old_value, value = [label, old_value, value].collect(&:to_s)
 
     unless no_html
-      label, old_value, value = *format_html_detail(label, old_value, value)
+      options = {}
+      options =  options.merge({:truncate => true, :more_link => true}) if property(detail) == :attribute && key == "description"
+      label, old_value, value = *format_html_detail(label, key, old_value, value, options)
       value = format_html_attachment_detail(key.sub("attachments", ""), value) if attachment_detail
     end
 
