@@ -28,7 +28,7 @@ group :ldap do
 end
 
 group :openid do
-  gem "ruby-openid", '~> 2.1.4', :require => 'openid'
+  gem "ruby-openid", '~> 2.8.0', :require => 'openid'
 end
 
 # Use the commented pure ruby gems, if you have not the needed prerequisites on
