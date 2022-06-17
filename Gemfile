@@ -4,7 +4,7 @@ source :rubygems
 gem "rails", "2.3.14"
 
 gem "coderay", "~> 1.0.0"
-gem "i18n", "~> 0.4.2"
+gem "i18n", "~> 0.8.0"
 gem "rubytree", "~> 0.5.2", :require => 'tree'
 gem "rdoc", ">= 2.4.2"
 gem "liquid", "~> 2.3.0"
